@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">What\'s My Phone</string>
+    <string name="manufacturer_title">Manufacturer</string>
+    <string name="model_name_title">Model Name</string>
+    <string name="model_number_title">Model Number</string>
+    <string name="serial_number_title">Serial Number</string>
+</resources>

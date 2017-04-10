@@ -1,0 +1,110 @@
+apply plugin: "com.android.application"
+
+def eclipseProperties=new Properties()
+file("project.properties").withInputStream
+{
+    eclipseProperties.load(it)
+}
+
+dependencies
+{
+    compile "com.jaredrummler:android-device-names:1.1.2"
+}
+
+android
+{
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    flavorDimensions "inquiry"
+
+    compileOptions
+    {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    signingConfigs
+    {
+        release
+        {
+            // a key must be provided prior to generating the task graph, or Gradle will not create signed APKs
+            storeFile=debug.storeFile
+            storePassword=debug.storePassword
+            keyAlias=debug.keyAlias
+            keyPassword=debug.keyPassword
+
+            gradle.taskGraph.whenReady
+            {
+                taskGraph -> if (taskGraph.hasTask(":app:assembleRelease"))
+                {
+                    storeFile=file(System.console().readLine("\nPlease enter the keystore path: "))
+                    storePassword=new String(System.console().readPassword("Please enter the keystore password: "))
+                    keyAlias=System.console().readLine("Please enter the key alias: ")
+                    keyPassword=new String(System.console().readPassword("Please enter the key password: "))
+                }
+            }
+        }
+    }
+
+    defaultConfig
+    {
+        targetSdkVersion eclipseProperties.getProperty("target")-"android-"
+
+        // note that this code assumes it's building the newest tag, and that all tags are present in the repository; to
+        // build an old tag, make a repository clone that does not contain any tags newer than the one you want
+        versionCode "git tag".execute().text.readLines().size()
+        versionName "git describe --tags --always HEAD".execute().text.trim()
+    }
+
+    buildTypes
+    {
+        release
+        {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-project.txt"
+            signingConfig signingConfigs.release
+        }
+    }
+
+    productFlavors
+    {
+        identifier
+        {
+            dimension "inquiry"
+            applicationId "codes.soloware.information.device.identifier"
+        }
+
+        model
+        {
+            dimension "inquiry"
+            applicationId "codes.soloware.information.device.model"
+        }
+    }
+
+    sourceSets
+    {
+        main
+        {
+            manifest.srcFile "AndroidManifest.xml"
+            assets.srcDirs=["assets"]
+            java.srcDirs=["src.java"]
+            res.srcDirs=["res"]
+        }
+
+        identifier
+        {
+            res.srcDirs=["res.identifier"]
+        }
+
+        model
+        {
+            res.srcDirs=["res.model"]
+        }
+    }
+}
+
+clean.doFirst
+{
+    delete "${projectDir}/app-identifier-release.apk"
+    delete "${projectDir}/app-model-release.apk"
+}

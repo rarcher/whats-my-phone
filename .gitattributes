@@ -1,0 +1,15 @@
+*               text=auto
+
+*.bat           text eol=crlf
+*.classpath     text
+*.gradle        text
+*.java          text diff=java
+*.md            text
+*.prefs         text
+*.project       text
+*.properties    text
+*.txt           text
+*.xml           text
+
+*.jar           binary
+*.png           binary
